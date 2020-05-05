@@ -26,7 +26,7 @@
                 "source": {
                     "type": "Git",
                     "git": {
-                        "uri": "https://github.com/bcgov/namex",
+                        "uri": "https://github.com/bcgov/namex.git",
                         "ref": "master"
                     },
                     "contextDir": "/jobs/clean-name-datafix"
