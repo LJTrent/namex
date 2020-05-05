@@ -1,8 +1,8 @@
-                         {
+{
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "clean-name-datafix",
+        "name": "clean-name-datafix-bc-template",
         "creationTimestamp": null
     },
     "objects": [
@@ -29,7 +29,7 @@
                         "uri": "https://github.com/bcgov/namex",
                         "ref": "master"
                     },
-                    "contextDir": "/jobs/clean-name-datafix"
+                    "contextDir": "jobs/clean-name-datafix"
                 },
                 "strategy": {
                     "type": "Source",
