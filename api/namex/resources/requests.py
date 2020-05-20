@@ -410,11 +410,11 @@ class Request(Resource):
 
                 # if the NR is in DRAFT then LOGICALLY lock the record in NRO
                 # if we fail to do that, send back the NR and the errors for user-intervention
-                if nrd.stateCd == State.DRAFT:
+                if nrd.stateCd == State.DRAFT and nrd.source != 'NAMEREQUEST':
                     warnings = nro.move_control_of_request_from_nro(nrd, user)
 
                 # if we're changing to DRAFT, update NRO status to "D" in NRO
-                if state == State.DRAFT:
+                if state == State.DRAFT and nrd.source != 'NAMEREQUEST':
                     change_flags = {
                         'is_changed__request': False,
                         'is_changed__previous_request': False,
@@ -436,7 +436,7 @@ class Request(Resource):
                 nrd.stateCd = state
                 nrd.userId = user.id
 
-                if state == State.CANCELLED:
+                if state == State.CANCELLED and nrd.source != 'NAMEREQUEST':
                     nro.cancel_nr(nrd, user.username)
 
                 # if our state wasn't INPROGRESS and it is now, ensure the furnished flag is N
@@ -576,7 +576,7 @@ class Request(Resource):
             # ## If the current state is DRAFT, the transfer control from NRO to NAMEX
             # if the NR is in DRAFT then LOGICALLY lock the record in NRO
             # if we fail to do that, send back the NR and the errors for user-intervention
-            if nrd.stateCd == State.DRAFT:
+            if nrd.stateCd == State.DRAFT and nrd.source != 'NAMEREQUEST':
                 warnings = nro.move_control_of_request_from_nro(nrd, user)
                 if warnings:
                     MessageServices.add_message(MessageServices.WARN, 'nro_lock', warnings)
@@ -900,29 +900,30 @@ class Request(Resource):
             ### Update NR Details in NRO (not for reset)
             else:
                 try:
-                    change_flags = {
-                        'is_changed__request': is_changed__request,
-                        'is_changed__previous_request': is_changed__previous_request,
-                        'is_changed__applicant': is_changed__applicant,
-                        'is_changed__address': is_changed__address,
-                        'is_changed__name1': is_changed__name1,
-                        'is_changed__name2': is_changed__name2,
-                        'is_changed__name3': is_changed__name3,
-                        'is_changed__nwpta_ab': is_changed__nwpta_ab,
-                        'is_changed__nwpta_sk': is_changed__nwpta_sk,
-                        'is_changed__request_state': is_changed__request_state,
+                    if nrd.source != 'NAMEREQUEST':
+                        change_flags = {
+                         'is_changed__request': is_changed__request,
+                         'is_changed__previous_request': is_changed__previous_request,
+                         'is_changed__applicant': is_changed__applicant,
+                         'is_changed__address': is_changed__address,
+                         'is_changed__name1': is_changed__name1,
+                         'is_changed__name2': is_changed__name2,
+                         'is_changed__name3': is_changed__name3,
+                         'is_changed__nwpta_ab': is_changed__nwpta_ab,
+                         'is_changed__nwpta_sk': is_changed__nwpta_sk,
+                         'is_changed__request_state': is_changed__request_state,
                     }
 
-                    # if any data has changed from an NR Details edit, update it in Oracle
-                    if any(value is True for value in change_flags.values()):
-                        warnings = nro.change_nr(nrd, change_flags)
-                        if warnings:
-                            MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
-                        else:
-                            ### now it's safe to delete any names that were blanked out
-                            for nrd_name in nrd.names:
-                                if deleted_names[nrd_name.choice - 1]:
-                                    nrd_name.delete_from_db()
+                        # if any data has changed from an NR Details edit, update it in Oracle
+                        if any(value is True for value in change_flags.values()):
+                            warnings = nro.change_nr(nrd, change_flags)
+                            if warnings:
+                                MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
+                            else:
+                                ### now it's safe to delete any names that were blanked out
+                                for nrd_name in nrd.names:
+                                    if deleted_names[nrd_name.choice - 1]:
+                                        nrd_name.delete_from_db()
 
                 except (NROServicesError, Exception) as err:
                     MessageServices.add_message('error', 'change_request_in_NRO', err)
@@ -1217,12 +1218,13 @@ class SyncNR(Resource):
         if not nrd:
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
 
-        warnings = nro.move_control_of_request_from_nro(nrd, user, True)
+        if nrd.source != 'NAMEREQUEST':
+            warnings = nro.move_control_of_request_from_nro(nrd, user, True)
 
-        if warnings:
-            resp = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json()
-            resp['warnings'] = warnings
-            return jsonify(resp), 206
+            if warnings:
+                resp = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json()
+                resp['warnings'] = warnings
+                return jsonify(resp), 206
 
         return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
 
