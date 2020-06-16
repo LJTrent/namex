@@ -86,7 +86,7 @@ parameters: [
           "displayName": "MAX_ROWS",
           "description": "The maximum number of Name Requests to process per job run",
           "required": true,
-          "value": "1000"
+          "value": "100000"
         },
         {
           "name": "NRO_SERVICE_ACCOUNT",
