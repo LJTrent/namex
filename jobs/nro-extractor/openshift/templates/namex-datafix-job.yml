@@ -28,11 +28,11 @@ objects:
                 secretKeyRef:
                   key: database-user
                   name: postgresql-${ENV_TAG}
-                  - name: PG_PASSWORD
-                    valueFrom:
-                      secretKeyRef:
-                        key: database-password
-                        name: postgresql-${ENV_TAG}
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: postgresql-${ENV_TAG}
             - name: PG_NAME
               valueFrom:
                 secretKeyRef:
