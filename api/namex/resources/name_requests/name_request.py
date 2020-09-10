@@ -181,7 +181,7 @@ class NameRequestPayment(NameRequestResource):
             return handle_exception(err, err.message, 500)
 
     def process_payment(self, nr_model):
-        nr_svc = self.nr_serv
+        nr_svc = self.nr_service
 
         # Update the state of the payment
         payment = get_active_payment(nr_model)
