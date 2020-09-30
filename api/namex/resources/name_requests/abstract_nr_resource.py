@@ -53,6 +53,8 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         :param svc:
         :return:
         """
+        nr = svc.save_request(nr)
+        # Return the updated name request
         return nr
 
     @staticmethod
@@ -63,6 +65,11 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         :param svc:
         :return:
         """
+        # Update the names, we can ignore everything else as this is only
+        # invoked when we're completing a payment
+        nr = svc.map_request_names(nr)
+        nr = svc.save_request(nr)
+        # Return the updated name request
         return nr
 
     def handle_nr_approval(self, nr, svc):

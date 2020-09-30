@@ -468,7 +468,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
 
             # Save the name request
-            nr_model.save_to_db()
+            #nr_model.save_to_db()
 
         return nr_model
 
