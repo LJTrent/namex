@@ -51,7 +51,7 @@ class AbstractNROResource(Resource):
             nro_warnings = None
         else:
             nro_warnings = self.nro_service.add_nr(name_request)
-            return self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
+        return self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
 
     # TODO: Update this! Add in mocks...
     def update_request_in_nro(self, name_request, on_success=None):
